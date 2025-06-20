@@ -1,92 +1,111 @@
 name: Cypress Tests
 
-on:
-  push:
-    branches:
-      - main
-      - develop  # Executa o workflow apenas nos branches principais
+on: push
 
 env:
-  VITE_API_URL: http://localhost:3001  # URL usada em tempo de execução nos testes
-  CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}  # Chave para gravar execuções no Cypress Dashboard (opcional)
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Token padrão do GitHub para autenticação
+  VITE_API_URL: http://localhost:3001
+  CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   install:
-    runs-on: ubuntu-latest  # Define a imagem base do GitHub Actions
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout code  # Baixa o código-fonte do repositório
+      - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Set up Node.js  # Garante que o Node esteja configurado corretamente
-        uses: actions/setup-node@v3
+      
+      - name: Cypress install
+        uses: cypress-io/github-action@v5
         with:
-          node-version: '18'
-
-      - name: Install dependencies  # Instala os pacotes necessários
-        run: npm install
-
-      - name: Build application  # Compila a aplicação para ambiente de produção
-        run: npm run build
-
-      - name: Upload build artifacts  # Salva os arquivos de build para uso nos próximos jobs
+          runTests: false
+          build: npm run build
+      
+      - name: Save build folder
         uses: actions/upload-artifact@v3
         with:
           name: build-folders
           path: |
-            dist
+            client/dist
+            server/dist
 
   end-to-end-tests:
     runs-on: ubuntu-latest
-    needs: install  # Este job depende da finalização do job de instalação/build
+    needs: install
+    strategy:
+      fail-fast: false
+      matrix:
+        containers: [1, 2, 3, 4, 5, 6]
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Download build artifacts  # Recupera os arquivos de build salvos
+      
+      - name: Download build folders
         uses: actions/download-artifact@v3
         with:
           name: build-folders
-
-      - name: Start server and run E2E tests  # Inicia a aplicação e executa os testes end-to-end
+          path: .  # Corrigido: define o caminho raiz para extração
+      
+      - name: Run E2E Tests
         uses: cypress-io/github-action@v5
         with:
           start: npm run start:ci
-          wait-on: 'http://localhost:3000'  # Aguarda a aplicação estar disponível antes de rodar os testes
+          wait-on: 'http://localhost:3000 http://localhost:3001/heroes'  # Corrigido: remover vírgula
           command: npm run test:e2e:ci
+          record: true
+          parallel: true
+          group: 'E2E Tests'
+          ci-build-id: ${{ github.run_id }}-${{ github.run_attempt }}
 
   component-tests:
     runs-on: ubuntu-latest
     needs: install
+    strategy:
+      fail-fast: false
+      matrix:
+        containers: [1, 2, 3, 4, 5, 6]
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Download build artifacts
+      
+      - name: Download build folders
         uses: actions/download-artifact@v3
         with:
           name: build-folders
-
-      - name: Run Component Tests  # Executa os testes de componente do Cypress
+          path: .  # Corrigido: define o caminho raiz para extração
+      
+      - name: Run CT Tests
         uses: cypress-io/github-action@v5
         with:
           command: npm run test:ct:ci
+          record: true
+          parallel: true
+          group: 'Component Tests'
+          ci-build-id: ${{ github.run_id }}-${{ github.run_attempt }}
 
   api-tests:
     runs-on: ubuntu-latest
     needs: install
+    strategy:
+      fail-fast: false
+      matrix:
+        containers: [1, 2, 3, 4, 5, 6]
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Download build artifacts
+      
+      - name: Download build folders
         uses: actions/download-artifact@v3
         with:
           name: build-folders
-
-      - name: Start server and run API tests  # Inicia o servidor e executa testes na API simulada
+          path: .  # Corrigido: define o caminho raiz para extração
+      
+      - name: Run API Tests
         uses: cypress-io/github-action@v5
         with:
           start: npm run start:ci
-          wait-on: 'http://localhost:3000'
+          wait-on: 'http://localhost:3000 http://localhost:3001/heroes'  # Corrigido: remover vírgula
           command: npm run test:api:ci
+          record: true
+          parallel: true
+          group: 'API Tests'
+          ci-build-id: ${{ github.run_id }}-${{ github.run_attempt }}
