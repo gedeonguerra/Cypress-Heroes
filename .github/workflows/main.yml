@@ -1,86 +1,92 @@
 name: Cypress Tests
 
-on: push
+on:
+  push:
+    branches:
+      - main
+      - develop  # Executa o workflow apenas nos branches principais
 
 env:
-  VITE_API_URL: http://localhost:3001
-  CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  VITE_API_URL: http://localhost:3001  # URL usada em tempo de execução nos testes
+  CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}  # Chave para gravar execuções no Cypress Dashboard (opcional)
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Token padrão do GitHub para autenticação
 
 jobs:
   install:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Define a imagem base do GitHub Actions
     steps:
-      - name: Checkout
+      - name: Checkout code  # Baixa o código-fonte do repositório
         uses: actions/checkout@v3
-      - name: Cypress install
-        uses: cypress-io/github-action@v5
+
+      - name: Set up Node.js  # Garante que o Node esteja configurado corretamente
+        uses: actions/setup-node@v3
         with:
-          runTests: false
-          build: npm run build
-      - name: Save build folder
+          node-version: '18'
+
+      - name: Install dependencies  # Instala os pacotes necessários
+        run: npm install
+
+      - name: Build application  # Compila a aplicação para ambiente de produção
+        run: npm run build
+
+      - name: Upload build artifacts  # Salva os arquivos de build para uso nos próximos jobs
         uses: actions/upload-artifact@v3
         with:
           name: build-folders
-          if-no-files-found: error
           path: |
-            client/dist
-            server/dist  
+            dist
+
   end-to-end-tests:
     runs-on: ubuntu-latest
-    needs: install
-    strategy:
-      fail-fast: false
-      matrix:
-        containers: [1, 2, 3, 4, 5, 6]
+    needs: install  # Este job depende da finalização do job de instalação/build
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v3
-      - name: Download the build folders
+
+      - name: Download build artifacts  # Recupera os arquivos de build salvos
         uses: actions/download-artifact@v3
         with:
           name: build-folders
-      - name: Run E2E Tests
+
+      - name: Start server and run E2E tests  # Inicia a aplicação e executa os testes end-to-end
         uses: cypress-io/github-action@v5
         with:
           start: npm run start:ci
-          wait-on: 'http://localhost:3000, http://localhost:3001/heroes'
+          wait-on: 'http://localhost:3000'  # Aguarda a aplicação estar disponível antes de rodar os testes
           command: npm run test:e2e:ci
+
   component-tests:
     runs-on: ubuntu-latest
     needs: install
-    strategy:
-      fail-fast: false
-      matrix:
-        containers: [1, 2, 3, 4, 5, 6]
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v3
-      - name: Download the build folders
+
+      - name: Download build artifacts
         uses: actions/download-artifact@v3
         with:
           name: build-folders
-      - name: Run CT Tests
+
+      - name: Run Component Tests  # Executa os testes de componente do Cypress
         uses: cypress-io/github-action@v5
         with:
           command: npm run test:ct:ci
+
   api-tests:
     runs-on: ubuntu-latest
     needs: install
-    strategy:
-      fail-fast: false
-      matrix:
-        containers: [1, 2, 3, 4, 5, 6]
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v3
-      - name: Download the build folders
+
+      - name: Download build artifacts
         uses: actions/download-artifact@v3
         with:
           name: build-folders
-      - name: Run API Tests
+
+      - name: Start server and run API tests  # Inicia o servidor e executa testes na API simulada
         uses: cypress-io/github-action@v5
         with:
           start: npm run start:ci
-          wait-on: 'http://localhost:3000, http://localhost:3001/heroes'
+          wait-on: 'http://localhost:3000'
           command: npm run test:api:ci
