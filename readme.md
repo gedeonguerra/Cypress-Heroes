@@ -1,58 +1,121 @@
-# Cypress Heroes Demo Application
+# 🤼‍♂️ Cypress Heroes Demo Application
 
-This is a demo application that shows how to use Cypress to run end-to-end,
-component, and API tests against an application.
+Bem-vindo ao **Cypress Heroes**, uma aplicação demo construída para mostrar como realizar testes **End-to-End**, **Componentes** e **API** utilizando o [Cypress](https://www.cypress.io/)! 🚀
 
-## Getting Started
+> Esta aplicação serve como laboratório para aprendizado, testes e automação utilizando uma stack moderna com React + NestJS + Prisma.
 
-The app is a mono repo that uses npm workspaces. Once you clone the project,
-install the dependencies at the root folder:
+---
 
-```sh
+## 📦 Tecnologias Utilizadas
+
+* ♋️ **React** com [Vite](https://vitejs.dev/) – Frontend moderno e rápido
+* 👥 **NestJS** – Backend escalável em Node.js
+* 🔀 **Prisma** – ORM para interagir com banco de dados
+* 🧪 **Cypress** – Testes E2E, de componentes e API
+* 📦 **NPM Workspaces** – Gerenciamento de monorepo
+
+---
+
+## 🚀 Começando
+
+Clone o projeto e instale as dependências no diretório raiz:
+
+```bash
+git clone https://github.com/gedeonguerra/Cypress-Heroes.git
+cd Cypress-Heroes
 npm install
 ```
 
-After that a few more things need to be set up (databases and such), to do so run:
+### ⚙️ Setup Inicial
 
-```sh
+Prepare o ambiente (incluindo o banco de dados) com:
+
+```bash
 npm run setup
 ```
 
+### 💻 Ambiente de Desenvolvimento
 
-To launch the app for development, run:
+Inicie a aplicação localmente com:
 
-```sh
+```bash
 npm run dev
 ```
 
-This will start both the client and server apps in dev mode. The site will be
-available at http://localhost:3000.
+A aplicação estará disponível em:
+📍 `http://localhost:3000`
 
-## App Overview
+---
 
-The Cypress Heroes app consists of a frontend client app written in React that
-uses Vite, as well as a backend app that uses NestJS.
+## 🧭 Estrutura da Aplicação
 
-### React Client App
+```
+Cypress-Heroes/
+├── client/   → Aplicação React (frontend)
+├── server/   → API com NestJS + Prisma
+├── cypress/  → Testes automatizados
+└── ...
+```
 
-The React client app is located in the **client** folder. It is a standard React [Vite](https://vitejs.dev/) app.
+### 💽 Client App (React)
 
-Todo: fill out
+* Local: `client/`
+* Construída com [React](https://react.dev/) + [Vite](https://vitejs.dev/)
+* Comunica-se com a API via variável `VITE_API_URL`
 
-### NestJS Server App
+📌 *Em breve*: documentação mais detalhada sobre a interface e componentes.
 
-The server app is in the **server** folder. It is built with the [NestJS](https://nestjs.com/) Node.js framework. It uses [Prisma](https://www.prisma.io/) for the database ORM.
+### 🧠 Server App (NestJS)
 
-#### Database seeding and resetting
+* Local: `server/`
+* Estruturada com [NestJS](https://nestjs.com/)
+* ORM: [Prisma](https://www.prisma.io/)
 
-The database is seeded from the **server/prisma/seed.ts** script when you set up the app. If at any time you want to reset the database back to its initial state, run:
+#### 📂 Banco de Dados
 
-```sh
+* O banco é configurado e populado com dados iniciais através do script `server/prisma/seed.ts`.
+
+Para resetar o banco de dados ao estado inicial:
+
+```bash
 npm run resetdb
 ```
 
-## Environment Variables
+---
 
-The client app uses an environment variable to know what the URL is for the
-backend api named `VITE_API_URL`. It defaults to "http://localhost:3001" for use
-in dev mode, and should be overriden in other environments/modes.
+## 🌐 Variáveis de Ambiente
+
+A variável principal utilizada no frontend é:
+
+| Variável       | Descrição                                  | Default                 |
+| -------------- | ------------------------------------------ | ----------------------- |
+| `VITE_API_URL` | URL da API utilizada pelo frontend (React) | `http://localhost:3001` |
+
+> Para outros ambientes (ex: produção), certifique-se de sobrescrever corretamente essa variável.
+
+---
+
+## 🧪 Rodando os Testes
+
+Execute os testes do Cypress com:
+
+```bash
+npx cypress open
+```
+
+Ou em modo headless (ideal para CI/CD):
+
+```bash
+npx cypress run
+```
+
+---
+
+## 🤝 Contribuições
+
+Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou pull requests com sugestões, melhorias ou correções.
+
+---
+
+
+
